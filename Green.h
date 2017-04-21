@@ -5,16 +5,28 @@
 
 #include "Node.h"
 #include <map>
+
+
 class Green {
-    /// constructor
+//    friend class Node;
+    /// public members
+public:
+    /// constructors
     Green(int num_input_nodes, int num_output_nodes, double learning_rate, std::map<int, int> &mp);
     /// public member functions
+    int getNum_input_nodes() const { return num_input_nodes; }
+    int getNum_output_nodes() const { return num_output_nodes; }
+    double getLearning_rate() const { return learning_rate; }
+    template <class T> void insert_data_BIAS(const std::vector<T> &data_vector);
+    template <class T> void insert_data_NB(const std::vector<T> &data_vector);
+    void forward_propagate_BIAS();
+    void forward_propagate_NB();
 
 
-public:
 private:
-    int num_output_nodes;
+/// private members
     int num_input_nodes;
+    int num_output_nodes;
     double learning_rate;
     Node::size_type total_attachments_made;
     std::vector<std::vector<Node>> neural_obj;

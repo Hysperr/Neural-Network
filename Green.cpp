@@ -1,4 +1,6 @@
 
+#include <cassert>
+#include <math.h>
 #include "Green.h"
 
 
@@ -88,11 +90,72 @@ void Green::generate_web(std::vector<std::vector<Node>> &mv) {
     }
 }
 
+template <class T>
+void Green::insert_data_BIAS(const std::vector<T> &data_vector) {
+    assert(data_vector.size() == neural_obj[0].size() - 1);
+    for (int i = 0; i < data_vector.size(); i++) {
+        neural_obj[0][i].val = data_vector[i];
+    }
+}
 
+template <class T>
+void Green::insert_data_NB(const std::vector<T> &data_vector) {
+    assert(data_vector.size() == neural_obj[0].size());
+    for (int i = 0; i < data_vector.size(); i++) {
+        neural_obj[0][i].val = data_vector[i];
+    }
+}
 
+void Green::forward_propagate_BIAS() {
+    /// begin forward pass
+    for (int i = 0; i < neural_obj.size() - 1; i++) {
+        for (int j = 0; j < neural_obj[i].size(); j++) {
+            if (i == neural_obj.size() - 2) { // last hidden layer.
+                // forward to every next node since next layer is output.
+                for (int k = 0; k < neural_obj[i + 1].size(); k++) {
+                    neural_obj[i + 1][k].val += (neural_obj[i][j].val * neural_obj[i][j].weights[k]);
+                }
+            }
+            else {
+                // forward to all but last node of every next layer, since we don't forward to a bias.
+                for (int k = 0; k < neural_obj[i + 1].size() - 1; k++) {
+                    neural_obj[i + 1][k].val += (neural_obj[i][j].val * neural_obj[i][j].weights[k]);
+                }
+            }
+        }
+        /// forwarding to next layer is complete. Now begin crush on that next layer. Sigmoid. Consider separate funct.
+        if (i == neural_obj.size() - 2) { // last hidden layer.
+            // crush on all next nodes since next layer is output.
+            for (int p = 0; p < neural_obj[i + 1].size(); p++) {
+                neural_obj[i + 1][p].val_before_sigmoid = neural_obj[i + 1][p].val;
+                neural_obj[i + 1][p].val = 1 / (1 + pow(M_E, -(neural_obj[i + 1][p].val)));
+            }
+        }
+        else {
+            // crush on all but last node of evey next layer, since we don't crush on a bias.
+            for (int p = 0; p < neural_obj[i + 1].size() - 1; p++) {
+                neural_obj[i + 1][p].val_before_sigmoid = neural_obj[i + 1][p].val;
+                neural_obj[i + 1][p].val = 1 / (1 + pow(M_E, -(neural_obj[i + 1][p].val)));
+            }
+        }
+    }
+}
 
-
-
+void Green::forward_propagate_NB() {
+    /// now begin forward pass procedures
+    for (int i = 0; i < neural_obj.size() - 1; i++) { // stop at last hidden layer, since we pass forward
+        for (int j = 0; j < neural_obj[i].size(); j++) {
+            for (int k = 0; k < neural_obj[i + 1].size(); k++) {
+                neural_obj[i + 1][k].val += (neural_obj[i][j].val * neural_obj[i][j].weights[k]);
+            }
+        }
+        /// forwarding to next layer is complete. Now begin crush on that next layer. Sigmoid.
+        for (int p = 0; p < neural_obj[i + 1].size(); p++) {
+            neural_obj[i + 1][p].val_before_sigmoid = neural_obj[i + 1][p].val;
+            neural_obj[i + 1][p].val = 1 / (1 + pow(M_E, -(neural_obj[i + 1][p].val)));
+        }
+    }
+}
 
 
 
