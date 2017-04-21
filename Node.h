@@ -31,7 +31,7 @@ private:
     std::vector<Node *> v_front;
     std::vector<Node *> v_back;
     std::vector<double> weights;
-//    std::vector<double> weights_old;
+    std::vector<double> old_weights;
 
     void initialize_weights(int front_connections) {
         /// seed must be established in main
