@@ -5,9 +5,12 @@
 
 #include <vector>
 #include <cstdlib>
+#include <map>
+#include <memory>
 
 class Node {
 public:
+    friend class Green;     // tightly coupled classes acting as one unit
     /// typedefs
     typedef size_t size_type;
     /// constructor
@@ -15,11 +18,12 @@ public:
     /// public member functions
     size_type attach_v_front(Node &node);
     size_type attach_v_back(Node &node);
-    void initialize_weights(int front_connections);
+    void set_output_identity(std::vector<std::vector<Node>> &mv, const std::map<int, double> &identity_map);
+
 
 private:
     double val;
-//    double val_uncrushed;
+    double val_before_sigmoid;
     double error;
     double real_identity;
 //    int unique_id;
@@ -29,7 +33,13 @@ private:
     std::vector<double> weights;
 //    std::vector<double> weights_old;
 
-//    friend void Green::generate_web(std::vector<std::vector<Node>> &mv);
+    void initialize_weights(int front_connections) {
+        /// seed must be established in main
+        for (int i = 0; i < front_connections; i++) {
+            weights.push_back( (double) rand() / RAND_MAX / 10);
+        }
+    }
+
 
 };
 
