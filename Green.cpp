@@ -1,10 +1,22 @@
 
 #include <cassert>
 #include "Green.h"
-
+#include <iostream>
+#include <algorithm>
 
 Green::Green(int num_input_nodes, int num_output_nodes, double learning_rate, std::map<int, int> &mp, bool include_bias) {
-    neural_obj = prepare_hidden_layers(mp);
+    /// note: private fields are initialized before
+    /// their use later in constructor
+    this->num_input_nodes = num_input_nodes;
+    this->num_output_nodes = num_output_nodes;
+    this->learning_rate = learning_rate;
+    this->bias = include_bias;
+    mv = prepare_hidden_layers(mp);
+    prepare_input_layer(mv);
+    prepare_output_layer(mv);
+    generate_neural_web(mv);
+    if (include_bias)
+        generate_bias_nodes();
 }
 
 
@@ -88,80 +100,80 @@ void Green::generate_neural_web(std::vector<std::vector<Node>> &mv) {
 }
 
 void Green::generate_bias_nodes() {
-    for (int i = 0; i < (int) neural_obj.size() - 1; i++) {
-        Node *bias_node = new Node((int) neural_obj[i + 1].size(), 0);
+    for (int i = 0; i < (int) mv.size() - 1; i++) {
+        Node *bias_node = new Node((int) mv[i + 1].size(), 0);
         bias_node->val = 1;
-        bias_node->initialize_weights((int) neural_obj[i + 1].size());
-        neural_obj[i].push_back(*bias_node);
-        for (int u = 0; u < (int) neural_obj[i + 1].size(); u++) {
-            neural_obj[i][neural_obj[i].size() - 1].attach_v_front(neural_obj[i + 1][u]);
-            neural_obj[i][neural_obj[i].size() - 1].conn += 1;
+        bias_node->initialize_weights((int) mv[i + 1].size());
+        mv[i].push_back(*bias_node);
+        for (int u = 0; u < (int) mv[i + 1].size(); u++) {
+            mv[i][mv[i].size() - 1].attach_v_front(mv[i + 1][u]);
         }
     }
 }
 
-template<class T>
-void Green::insert_data(const std::vector<T> &data_vector) {
-    if (uses_bias)
-        insert_data_BIAS(data_vector);
-    else
-        insert_data_NB(data_vector);
+
+void Green::insert_data(const std::vector<double> &data_vector) {
+    (bias) ? insert_data_BIAS(data_vector) : insert_data_NB(data_vector);
 }
 
-template <class T>
-void Green::insert_data_BIAS(const std::vector<T> &data_vector) {
-    assert(data_vector.size() == neural_obj[0].size() - 1);
+void Green::insert_data_BIAS(const std::vector<double> &data_vector) {
+    assert(data_vector.size() == num_input_nodes);
     for (int i = 0; i < data_vector.size(); i++) {
-        neural_obj[0][i].val = data_vector[i];
+        mv[0][i].val = data_vector[i];
     }
 }
 
-template <class T>
-void Green::insert_data_NB(const std::vector<T> &data_vector) {
-    assert(data_vector.size() == neural_obj[0].size());
+void Green::insert_data_NB(const std::vector<double> &data_vector) {
+    assert(data_vector.size() == num_input_nodes);
     for (int i = 0; i < data_vector.size(); i++) {
-        neural_obj[0][i].val = data_vector[i];
+        mv[0][i].val = data_vector[i];
+    }
+}
+
+void Green::set_output_identity(const std::map<int, int> &identity_map) {
+    assert(identity_map.size() == mv[mv.size() - 1].size());
+    auto it = identity_map.begin();
+    for (int i = 0; i < identity_map.size(); i++) {
+        mv[mv.size() - 1][i].real_identity = it->second;
+//         std::cout << "output node " << i << " has real_identity " << it->second << '\n';       // debug
+        ++it;
     }
 }
 
 void Green::forward_propagate() {
-    if (uses_bias)
-        forward_propagate_BIAS();
-    else
-        forward_propagate_NB();
-//      (uses_bias) ? forward_propagate_BIAS() : forward_propagate_NB();
+      (bias) ? forward_propagate_BIAS() : forward_propagate_NB();
 }
 
 void Green::forward_propagate_BIAS() {
     /// begin forward pass
-    for (int i = 0; i < neural_obj.size() - 1; i++) {
-        for (int j = 0; j < neural_obj[i].size(); j++) {
-            if (i == neural_obj.size() - 2) { // last hidden layer.
+    for (int i = 0; i < mv.size() - 1; i++) {
+        for (int j = 0; j < mv[i].size(); j++) {
+            if (i == mv.size() - 2) { // last hidden layer.
                 // forward to every next node since next layer is output.
-                for (int k = 0; k < neural_obj[i + 1].size(); k++) {
-                    neural_obj[i + 1][k].val += (neural_obj[i][j].val * neural_obj[i][j].weights[k]);
+                for (int k = 0; k < mv[i + 1].size(); k++) {
+                    mv[i + 1][k].val += (mv[i][j].val * mv[i][j].weights[k]);
                 }
             }
             else {
                 // forward to all but last node of every next layer, since we don't forward to a bias.
-                for (int k = 0; k < neural_obj[i + 1].size() - 1; k++) {
-                    neural_obj[i + 1][k].val += (neural_obj[i][j].val * neural_obj[i][j].weights[k]);
+                for (int k = 0; k < mv[i + 1].size() - 1; k++) {
+                    mv[i + 1][k].val += (mv[i][j].val * mv[i][j].weights[k]);
                 }
             }
         }
         /// forwarding to next layer is complete. Now begin crush on that next layer. Sigmoid. Consider separate funct.
-        if (i == neural_obj.size() - 2) { // last hidden layer.
+        if (i == mv.size() - 2) { // last hidden layer.
             // crush on all next nodes since next layer is output.
-            for (int p = 0; p < neural_obj[i + 1].size(); p++) {
-                neural_obj[i + 1][p].val_before_sigmoid = neural_obj[i + 1][p].val;
-                neural_obj[i + 1][p].val = 1 / (1 + pow(M_E, -(neural_obj[i + 1][p].val)));
+            for (int p = 0; p < mv[i + 1].size(); p++) {
+//                mv[i + 1][p].val_before_sigmoid = mv[i + 1][p].val;     // special case
+                mv[i + 1][p].val = 1 / (1 + pow(M_E, -(mv[i + 1][p].val)));
             }
         }
         else {
             // crush on all but last node of evey next layer, since we don't crush on a bias.
-            for (int p = 0; p < neural_obj[i + 1].size() - 1; p++) {
-                neural_obj[i + 1][p].val_before_sigmoid = neural_obj[i + 1][p].val;
-                neural_obj[i + 1][p].val = 1 / (1 + pow(M_E, -(neural_obj[i + 1][p].val)));
+            for (int p = 0; p < mv[i + 1].size() - 1; p++) {
+//                mv[i + 1][p].val_before_sigmoid = mv[i + 1][p].val;     // special case
+                mv[i + 1][p].val = 1 / (1 + pow(M_E, -(mv[i + 1][p].val)));
             }
         }
     }
@@ -169,113 +181,164 @@ void Green::forward_propagate_BIAS() {
 
 void Green::forward_propagate_NB() {
     /// now begin forward pass procedures
-    for (int i = 0; i < neural_obj.size() - 1; i++) { // stop at last hidden layer, since we pass forward
-        for (int j = 0; j < neural_obj[i].size(); j++) {
-            for (int k = 0; k < neural_obj[i + 1].size(); k++) {
-                neural_obj[i + 1][k].val += (neural_obj[i][j].val * neural_obj[i][j].weights[k]);
+    for (int i = 0; i < mv.size() - 1; i++) {       // stop at last hidden layer, since we pass forward
+        for (int j = 0; j < mv[i].size(); j++) {
+            for (int k = 0; k < mv[i + 1].size(); k++) {
+                mv[i + 1][k].val += (mv[i][j].val * mv[i][j].weights[k]);
             }
         }
         /// forwarding to next layer is complete. Now begin crush on that next layer. Sigmoid.
-        for (int p = 0; p < neural_obj[i + 1].size(); p++) {
-            neural_obj[i + 1][p].val_before_sigmoid = neural_obj[i + 1][p].val;
-            neural_obj[i + 1][p].val = 1 / (1 + pow(M_E, -(neural_obj[i + 1][p].val)));
+        for (int p = 0; p < mv[i + 1].size(); p++) {
+            mv[i + 1][p].val_before_sigmoid = mv[i + 1][p].val;
+            mv[i + 1][p].val = 1 / (1 + pow(M_E, -(mv[i + 1][p].val)));
         }
     }
 }
 
-void Green::back_propagate(const int label) {
-    /// bias node consideration doesn't matter for back propagation
-    for (int i = 0; i < neural_obj.size(); i++) {
-        for (int j = 0; j < neural_obj[i].size(); j++) {
-            neural_obj[i][j].old_weights = neural_obj[i][j].weights;
+void Green::back_propagate(const double &label) {
+/// DOES NOT TAKE BIAS NODE INTO CONSIDERATION ///
+    for (int i = 0; i < mv.size(); i++) {
+        for (int j = 0; j < mv[i].size(); j++) {
+            mv[i][j].old_weights = mv[i][j].weights;
         }
     }
-
     /// 1) calculate errors of output neurons
-    for (int i = 0; i < neural_obj[neural_obj.size() - 1].size(); i++) {
-        if (label == i)
-            neural_obj[neural_obj.size() - 1][i].val_before_sigmoid =
-                    derivative_of_sigmoid(neural_obj[neural_obj.size() - 1][i].val_before_sigmoid) * (1 - neural_obj[neural_obj.size() - 1][i].val);
+    for (int i = 0; i < mv[mv.size() - 1].size(); i++) {
+        if (label == mv[mv.size() - 1][i].real_identity)    // in case output is fraction, use the real identity, not i
+            mv[mv.size() - 1][i].val_before_sigmoid = derivative_of_sigmoid(mv[mv.size() - 1][i].val_before_sigmoid) * (1 - mv[mv.size() - 1][i].val);
         else
-            neural_obj[neural_obj.size() - 1][i].val_before_sigmoid =
-                    derivative_of_sigmoid(neural_obj[neural_obj.size() - 1][i].val_before_sigmoid) * (0 - neural_obj[neural_obj.size() - 1][i].val);
-
-        neural_obj[neural_obj.size() - 1][i].error = neural_obj[neural_obj.size() - 1][i].val_before_sigmoid;
+            mv[mv.size() - 1][i].val_before_sigmoid = derivative_of_sigmoid(mv[mv.size() - 1][i].val_before_sigmoid) * (0 - mv[mv.size() - 1][i].val);
+        mv[mv.size() - 1][i].error = mv[mv.size() - 1][i].val_before_sigmoid;
     }
-
     /// 2) change output layer's incoming weights
-    for (int i = 0; i < neural_obj[neural_obj.size() - 2].size(); i++) {
-        for (int j = 0; j < neural_obj[neural_obj.size() - 1].size(); j++) {
-            neural_obj[neural_obj.size() - 2][i].weights[j] = neural_obj[neural_obj.size() - 2][i].weights[j] + learning_rate * neural_obj[neural_obj.size() - 1][j].error * neural_obj[neural_obj.size() - 2][i].val;
+    for (int i = 0; i < mv[mv.size() - 2].size(); i++) {
+        for (int j = 0; j < mv[mv.size() - 1].size(); j++) {
+            mv[mv.size() - 2][i].weights[j] = mv[mv.size() - 2][i].weights[j] + learning_rate * mv[mv.size() - 1][j].error * mv[mv.size() - 2][i].val;
         }
     }
-
     /// 3) calculate all hidden errors
-    for (int i = (int) (neural_obj.size() - 2); i >= 1; i--) {
-        for (int j = 0; j < neural_obj[i].size(); j++) {
+    for (int i = (int) (mv.size() - 2); i >= 1; i--) {
+        for (int j = 0; j < mv[i].size(); j++) {
             double err_gather = 0;
-            for (int k = 0; k < neural_obj[i][j].v_front.size(); k++) {
-                err_gather += (neural_obj[i][j].old_weights[k] * neural_obj[i][j].v_front[k]->error);
+            for (int k = 0; k < mv[i][j].v_front.size(); k++) {
+                err_gather += (mv[i][j].old_weights[k] * mv[i][j].v_front[k]->error);
             }
-            neural_obj[i][j].error = derivative_of_sigmoid(neural_obj[i][j].val_before_sigmoid) * err_gather;
-            neural_obj[i][j].val_before_sigmoid = neural_obj[i][j].error;   // for OLEG
+            mv[i][j].error = derivative_of_sigmoid(mv[i][j].val_before_sigmoid) * err_gather;
+//            mv[i][j].val_before_sigmoid = mv[i][j].error;   // for OOOO
         }
     }
-
     /// 4) change hidden layer weights
-    for (int i = (int) (neural_obj.size() - 3); i >= 0; i--) {
-        for (int j = 0; j < neural_obj[i].size(); j++) {
-            for (int k = 0; k < neural_obj[i][j].v_front.size(); k++) {
-                neural_obj[i][j].weights[k] = neural_obj[i][j].weights[k] + learning_rate * neural_obj[i][j].v_front[k]->error * neural_obj[i][j].val;
+    for (int i = (int) (mv.size() - 3); i >= 0; i--) {
+        for (int j = 0; j < mv[i].size(); j++) {
+            for (int k = 0; k < mv[i][j].v_front.size(); k++) {
+                mv[i][j].weights[k] = mv[i][j].weights[k] + learning_rate * mv[i][j].v_front[k]->error * mv[i][j].val;
             }
         }
     }
 }
 
 void Green::clear_network() {
-    if (uses_bias)
-        clear_network_BIAS();
-    else
-        clear_network_NB();
+    (bias) ? clear_network_BIAS() : clear_network_NB();
 }
 
 void Green::clear_network_BIAS() {
-    for (int i = 1; i < neural_obj.size(); i++) {
-        if (i == neural_obj.size() - 1) {
-            for (int j = 0; j < neural_obj[i].size(); j++) {
-                neural_obj[i][j].val = 0;
-                neural_obj[i][j].val_before_sigmoid = 0;
+    std::cout << "YOU SHOULDN'T SEE THIS IN XOR!\n";
+    for (int i = 1; i < mv.size(); i++) {
+        if (i == mv.size() - 1) {
+            for (int j = 0; j < mv[i].size(); j++) {
+                mv[i][j].val = 0;
+                mv[i][j].val_before_sigmoid = 0;
             }
         }
         else {
-            for (int j = 0; j < neural_obj[i].size() - 1; j++) {
-                neural_obj[i][j].val = 0;
-                neural_obj[i][j].val_before_sigmoid = 0;
+            for (int j = 0; j < mv[i].size() - 1; j++) {
+                mv[i][j].val = 0;
+                mv[i][j].val_before_sigmoid = 0;
             }
         }
     }
 }
 
 void Green::clear_network_NB() {
-    for (int i = 1; i < neural_obj.size(); i++) {
-        for (int j = 0; j < neural_obj[i].size(); j++) {
-            neural_obj[i][j].val = 0;
-            neural_obj[i][j].val_before_sigmoid = 0;
+    for (int i = 1; i < mv.size(); i++) {
+        for (int j = 0; j < mv[i].size(); j++) {
+            mv[i][j].val = 0;
+            mv[i][j].val_before_sigmoid = 0;
         }
     }
+}
+
+void Green::print_neural_layer(int index) {
+    std::vector<Node> layer = mv[index];
+    if (index == mv.size() - 1)
+        std::cout << "========== OUTPUT LAYER (INDEX " << index << ") ==========" << std::endl;
+    else if (index == 0)
+        std::cout << "========== INPUT LAYER (INDEX " << index << ") ==========" << std::endl;
+    else
+        std::cout << "========== HIDDEN LAYER (INDEX " << index << " )========== " << std::endl;
+    for (Node node : layer) {
+        std::cout << "val " << node.val << '\n';
+        std::cout << "val_before_sigmoid " << node.val_before_sigmoid << '\n';
+        std::cout << "conn " << node.conn << '\n';
+//        std::cout << "id# " << node.unique_id << '\n';
+        std::cout << "identity " << node.real_identity << '\n';
+        std::cout << "weights "; for (double num : node.weights) std::cout << num << " "; std::cout << '\n';
+        std::cout << '\n';
+    }
+    std::cout << "TOTAL " << layer.size() << " NODES IN LAYER " << index << '\n';
+}
+
+void Green::print_output_layer() {
+    int index = (int) mv.size() - 1;
+    std::cout << "========== OUTPUT LAYER (INDEX " << index << ") ==========" << std::endl;
+    std::vector<Node> ovec = mv[mv.size() - 1];
+    for (Node node : ovec) {
+        std::cout << "val " << node.val << '\n';
+        std::cout << "val_before_sigmoid " << node.val_before_sigmoid << '\n';
+        std::cout << "conn " << node.conn << '\n';
+//        std::cout << "id# " << node.unique_id << '\n';
+        std::cout << "identity " << node.real_identity << '\n';
+        std::cout << "weights "; for (double num : node.weights) std::cout << num << " "; std::cout << '\n';
+        std::cout << '\n';
+    }
+}
+
+void Green::print_ENTIRE_network() {
+    for (int i = 0; i < mv.size(); i++) {
+        if (i == mv.size() - 1)
+            std::cout << "========== OUTPUT LAYER (INDEX " << i << ") ==========" << std::endl;
+        else if (i == 0)
+            std::cout << "========== INPUT LAYER (INDEX " << i << ") ==========" << std::endl;
+        else
+            std::cout << "========== HIDDEN LAYER (INDEX " << i << " )========== " << std::endl;
+        std::vector<Node> layer = mv[i];
+        for (Node node : layer) {
+            std::cout << "val: " << node.val << '\n';
+            std::cout << "val_before_sigmoid " << node.val_before_sigmoid << '\n';
+            std::cout << "conn: " << node.conn << '\n';
+            std::cout << "identity: " << node.real_identity << '\n';
+            std::cout << "weights: "; for (double w : node.weights) std::cout << w << " ";
+            std::cout << "\n\n";
+        }
+    }
+}
+
+bool Green::print_best_guess(const double &label) {
+    std::vector<double> max_vector;
+    for (int i = 0; i < mv[mv.size() - 1].size(); i++) {
+        max_vector.push_back(mv[mv.size() - 1][i].val);
+    }
+    std::vector<double>::iterator answer_iter = std::max_element(max_vector.begin(), max_vector.end());
+    double pos = (answer_iter - max_vector.begin()); // explicit cast to int then implicit to double below
+//    std::cout << "Based on my output value of " << *answer_iter << " I believe this is a(n) " << pos << std::endl;
+//    std::cout << "In reality this is a(n) " << label << std::endl;
+    return (pos == label);
 }
 
 
 
 
-
-
-
-
-
-
-
-
+// check forward prop label area
 
 
 

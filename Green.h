@@ -9,31 +9,35 @@
 
 
 class Green {
-//    friend class Node;
     /// public members
 public:
     /// constructors
     Green(int num_input_nodes, int num_output_nodes, double learning_rate, std::map<int, int> &mp, bool include_bias = false);
-    /// public member functions
+    /// getters
     int getNum_input_nodes() const { return num_input_nodes; }
     int getNum_output_nodes() const { return num_output_nodes; }
     double getLearning_rate() const { return learning_rate; }
-    template <class T> void insert_data(const std::vector<T> &data_vector);
+    std::vector<std::vector<Node>>& getNeural_obj() { return mv; }
+    /// actions
+    void set_output_identity(const std::map<int, int>& identity_map);
+    void insert_data(const std::vector<double> &data_vector);
     void forward_propagate();
-    void back_propagate(const int label);
+    void back_propagate(const double &label);
     void clear_network();
-
-
+    bool print_best_guess(const double &label);
+    /// prints
+    void print_neural_layer(int index);
+    void print_output_layer();
+    void print_ENTIRE_network();
 
 private:
 /// private members
-    bool uses_bias;
+    bool bias;
     int num_input_nodes;
     int num_output_nodes;
     double learning_rate;
-    Node::size_type total_attachments_made;
-    std::vector<std::vector<Node>> neural_obj;
-
+//    Node::size_type total_attachments_made;
+    std::vector<std::vector<Node>> mv;
     /// private member functions (we use these to build the neural object)
     std::vector<std::vector<Node>> prepare_hidden_layers(std::map<int, int>& mp);
     void prepare_input_layer(std::vector<std::vector<Node>> &mv);
@@ -41,14 +45,13 @@ private:
     void generate_neural_web(std::vector<std::vector<Node>> &mv);
     void generate_bias_nodes();
     /// their public counterparts decide which to call NB = no bias nodes, BIAS = bias nodes
-    template <class T> void insert_data_BIAS(const std::vector<T> &data_vector);
-    template <class T> void insert_data_NB(const std::vector<T> &data_vector);
+    void insert_data_BIAS(const std::vector<double> &data_vector);
+    void insert_data_NB(const std::vector<double> &data_vector);
     void forward_propagate_BIAS();
     void forward_propagate_NB();
     void clear_network_BIAS();
     void clear_network_NB();
-
-    /// private member functions defined in class
+    /// private member function inlined in class
     double derivative_of_sigmoid(double x){
         double num = (pow(M_E, x)) / pow((pow(M_E, x) + 1), 2);
         return num;

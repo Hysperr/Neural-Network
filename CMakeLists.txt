@@ -8,6 +8,10 @@ set(SOURCE_FILES
         Green.h
         main.cpp
         Node.cpp
-        Node.h)
+        Node.h
+        optdigits_train.txt
+        optdigits_names.txt
+        optdigits_test.txt
+        cmake-build-debug/tester.cpp)
 
 add_executable(Neural_Network ${SOURCE_FILES})
