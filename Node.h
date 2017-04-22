@@ -18,8 +18,10 @@ public:
     /// public member functions
     size_type attach_v_front(Node &node);
     size_type attach_v_back(Node &node);
-    void set_output_identity(std::vector<std::vector<Node>> &mv, const std::map<int, double> &identity_map);
 
+    /// for testing. delete when done
+    double& weightref(int i) { return weights[i]; }
+    double& identityref() { return real_identity; }
 
 private:
     double val;
@@ -31,7 +33,7 @@ private:
     std::vector<Node *> v_front;
     std::vector<Node *> v_back;
     std::vector<double> weights;
-//    std::vector<double> weights_old;
+    std::vector<double> old_weights;
 
     void initialize_weights(int front_connections) {
         /// seed must be established in main
