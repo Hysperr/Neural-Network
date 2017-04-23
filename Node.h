@@ -10,18 +10,11 @@
 
 class Node {
 public:
-    friend class Green;     // tightly coupled classes acting as one unit
-    /// typedefs
+    friend class Green;         // tightly coupled classes acting as one unit
     typedef size_t size_type;
-    /// constructor
     Node(int front_conn, int back_conn);
-    /// public member functions
     size_type attach_v_front(Node &node);
     size_type attach_v_back(Node &node);
-
-    /// for testing. delete when done
-    double& weightref(int i) { return weights[i]; }
-    double& identityref() { return real_identity; }
 
 private:
     double val;
@@ -37,9 +30,8 @@ private:
 
     void initialize_weights(int front_connections) {
         /// seed must be established in main
-        for (int i = 0; i < front_connections; i++) {
-            weights.push_back( (double) rand() / RAND_MAX / 10);
-        }
+        for (int i = 0; i < front_connections; i++)
+            weights.push_back( ((double) rand() / RAND_MAX) / 100.0);
     }
 
 

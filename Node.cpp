@@ -2,8 +2,6 @@
 #include "Node.h"
 #include "Green.h"
 #include <iostream>
-#include <cassert>
-#include <bits/unique_ptr.h>
 
 Node::Node(int front_conn, int back_conn) : val(0), val_before_sigmoid(0), error(0), real_identity(-1), conn(0), weights(), v_front(
         (unsigned long long int) front_conn, nullptr), v_back((unsigned long long int) back_conn, nullptr) {
@@ -49,5 +47,3 @@ Node::size_type Node::attach_v_back(Node &node) {
     return num_attaches;
     // consider returning the node, making this a friend function of neural class that updates total attaches variable
 }
-
-
