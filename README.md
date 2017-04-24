@@ -1,10 +1,11 @@
-# Neural_Network
+# Neural_Network 
+###### C++11 Required ######
 These files are part of a personal attempt to create a convolutional neural network (CNN).
 The two classes that make the base neural net are tightly coupled such that they act as a single unit, only separated.
 In short, the Node class provides the building blocks to build the NeuralNet class which allows users to create multiple feed-forward multilayered artificial neural networks with backpropagation. From there a linker class will join these such that we have another neural net object where each node is itself a neural net.
 
 ## Included Files
-* A driver file, digit training, and test file are provided as a base demonstration. 
+* A driver file, digit training file, and test file are provided as a base demonstration. 
 * A configuration file provided to tweak your neural net characteristics.
 
 ## Function Call Order
