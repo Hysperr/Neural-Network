@@ -4,8 +4,8 @@ The two classes that make the base neural net are tightly coupled such that they
 In short, the Node class provides the building blocks to build the NeuralNet class which allows users to create multiple feed-forward multilayered artificial neural networks with backpropagation. From there a linker class will join these such that we have another neural net object where each node is itself a neural net.
 
 ## Included Files
-* A Driver file, digit training, and tester file are provided as a base demonstration. 
-* A configuration file provided to tweak your net characteristics.
+* A driver file, digit training, and test file are provided as a base demonstration. 
+* A configuration file provided to tweak your neural net characteristics.
 
 ## Function Call Order
 
