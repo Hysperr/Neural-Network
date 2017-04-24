@@ -25,7 +25,11 @@ In short, the Node class provides the building blocks to build the NeuralNet cla
 6. Call `forward_propagate()`
    * #### activates and passes data
 7. Call `choose_answer()` to have net select its answer
+   * #### The default parameter to print neural net's belief values is `false`. `True` to activate
    * #### _If testing after training DO NOT backpropagate!_ Go to step 9
 8. Call `back_propagate()`
    * #### trains network by updating weights
-9. *If running multiple epochs, remember to clear network!*
+9. *If running multiple epochs, remember to clear network!*  
+
+
+# Congrats! You've Run A Neural Network :D
