@@ -1,10 +1,11 @@
 
 #include <cassert>
-#include "Green.h"
+#include "NeuralNet.h"
 #include <iostream>
 #include <algorithm>
 
-Green::Green(int num_input_nodes, int num_output_nodes, double learning_rate, std::map<int, int> &mp, bool include_bias) {
+NeuralNet::NeuralNet(unsigned num_input_nodes, unsigned num_output_nodes, double learning_rate,
+                     std::map<unsigned, unsigned> &mp, bool include_bias) {
     this->total_conn = 0;
     this->num_input_nodes = num_input_nodes;
     this->num_output_nodes = num_output_nodes;
@@ -18,7 +19,7 @@ Green::Green(int num_input_nodes, int num_output_nodes, double learning_rate, st
         generate_bias_nodes();
 }
 
-std::vector<std::vector<Node>> Green::prepare_hidden_layers(std::map<int, int> &mp) {
+std::vector<std::vector<Node>> NeuralNet::prepare_hidden_layers(std::map<unsigned, unsigned> &mp) {
     std::vector<std::vector<Node>> master_vector;
     for (auto it = mp.begin(); it != mp.end(); ++it) {
         std::vector<Node> layer;  // layer vector
@@ -58,7 +59,7 @@ std::vector<std::vector<Node>> Green::prepare_hidden_layers(std::map<int, int> &
     return master_vector;
 }
 
-void Green::prepare_input_layer() {
+void NeuralNet::prepare_input_layer() {
     std::vector<Node> input_vector;
     for (int i = 0; i < num_input_nodes; i++) {
         Node *node = new Node((int) mv[0].size(), 0);
@@ -69,7 +70,7 @@ void Green::prepare_input_layer() {
     mv.insert(it, input_vector);
 }
 
-void Green::prepare_output_layer() {
+void NeuralNet::prepare_output_layer() {
     std::vector<Node> output_vector;
     for (int i = 0; i < num_output_nodes; i++) {
         Node *node = new Node(0, (int) mv[mv.size() - 1].size());
@@ -78,7 +79,7 @@ void Green::prepare_output_layer() {
     mv.push_back(output_vector);
 }
 
-void Green::generate_neural_web() {
+void NeuralNet::generate_neural_web() {
     // connect forwards
     for (int i = 0; i < mv.size() - 1; i++) {
         for (int j = 0; j < mv[i].size(); j++) {
@@ -91,13 +92,14 @@ void Green::generate_neural_web() {
     for (int p = (int) (mv.size() - 1); p >= 1; p--) {
         for (int q = 0; q < mv[p].size(); q++) {
             for (int r = 0; r < mv[p - 1].size(); r++) {
-                total_conn += mv[p][q].attach_v_back(mv[p - 1][r]);
+                mv[p][q].attach_v_back(mv[p - 1][r]);
+                // decided no inclusion of total_conn
             }
         }
     }
 }
 
-void Green::generate_bias_nodes() {
+void NeuralNet::generate_bias_nodes() {
     for (int i = 0; i < (int) mv.size() - 1; i++) {
         Node *bias_node = new Node((int) mv[i + 1].size(), 0);
         bias_node->val = 1.0;
@@ -109,9 +111,9 @@ void Green::generate_bias_nodes() {
     }
 }
 
-void Green::set_output_identity(const std::map<int, double> &identity_map, bool debug_print) {
+void NeuralNet::set_output_identity(const std::map<unsigned, double> &identity_map, bool debug_print) {
     assert(identity_map.size() == num_output_nodes);
-    std::map<int, double>::const_iterator it = identity_map.begin();   // auto for legibility
+    std::map<unsigned, double>::const_iterator it = identity_map.begin();   // auto for legibility
     for (int i = 0; i < identity_map.size(); i++) {
         mv[mv.size() - 1][i].real_identity = it->second;
         if (debug_print)
@@ -120,14 +122,14 @@ void Green::set_output_identity(const std::map<int, double> &identity_map, bool 
     }
 }
 
-void Green::insert_data(const std::vector<double> &data_vector) {
+void NeuralNet::insert_data(const std::vector<double> &data_vector) {
     assert(data_vector.size() == num_input_nodes);
     for (int i = 0; i < data_vector.size(); i++) {
         mv[0][i].val = data_vector[i];
     }
 }
 
-void Green::forward_propagate_BIAS() {
+void NeuralNet::forward_propagate_BIAS() {
     /// begin forward pass
     for (int i = 0; i < mv.size() - 1; i++) {
         for (int j = 0; j < mv[i].size(); j++) {
@@ -142,23 +144,23 @@ void Green::forward_propagate_BIAS() {
                 }
             }
         }
-        /// forwarding to next layer is complete. Now begin crush on that next layer. Sigmoid. Consider separate funct.
+        /// forwarding to next layer is complete. Now begin crush on that next layer. Sigmoid.
         if (i == mv.size() - 2) { // last hidden layer.
             for (int p = 0; p < mv[i + 1].size(); p++) {
-                mv[i + 1][p].val_before_sigmoid = mv[i + 1][p].val;     // special case
+                mv[i + 1][p].val_before_sigmoid = mv[i + 1][p].val;
                 mv[i + 1][p].val = 1 / (1 + pow(M_E, -(mv[i + 1][p].val)));
             }
         }
         else {
             for (int p = 0; p < mv[i + 1].size() - 1; p++) {
-                mv[i + 1][p].val_before_sigmoid = mv[i + 1][p].val;     // special case
+                mv[i + 1][p].val_before_sigmoid = mv[i + 1][p].val;
                 mv[i + 1][p].val = 1 / (1 + pow(M_E, -(mv[i + 1][p].val)));
             }
         }
     }
 }
 
-void Green::forward_propagate_NB() {
+void NeuralNet::forward_propagate_NB() {
     /// now begin forward pass procedures
     for (int i = 0; i < mv.size() - 1; i++) {
         for (int j = 0; j < mv[i].size(); j++) {
@@ -174,7 +176,7 @@ void Green::forward_propagate_NB() {
     }
 }
 
-void Green::back_propagate(const double &label) {
+void NeuralNet::back_propagate(const double &label) {
 /// DOES NOT TAKE BIAS NODE INTO CONSIDERATION ///
     for (int i = 0; i < mv.size(); i++) {
         for (int j = 0; j < mv[i].size(); j++) {
@@ -183,16 +185,21 @@ void Green::back_propagate(const double &label) {
     }
     /// 1) calculate errors of output neurons
     for (int i = 0; i < mv[mv.size() - 1].size(); i++) {
-        if (label == mv[mv.size() - 1][i].real_identity)
-            mv[mv.size() - 1][i].val_before_sigmoid = derivative_of_sigmoid(mv[mv.size() - 1][i].val_before_sigmoid) * (1 - mv[mv.size() - 1][i].val);
-        else
-            mv[mv.size() - 1][i].val_before_sigmoid = derivative_of_sigmoid(mv[mv.size() - 1][i].val_before_sigmoid) * (0 - mv[mv.size() - 1][i].val);
+        if (label == mv[mv.size() - 1][i].real_identity) {
+            mv[mv.size() - 1][i].val_before_sigmoid =
+                    derivative_of_sigmoid(mv[mv.size() - 1][i].val_before_sigmoid) * (1 - mv[mv.size() - 1][i].val);
+        }
+        else {
+            mv[mv.size() - 1][i].val_before_sigmoid =
+                    derivative_of_sigmoid(mv[mv.size() - 1][i].val_before_sigmoid) * (0 - mv[mv.size() - 1][i].val);
+        }
         mv[mv.size() - 1][i].error = mv[mv.size() - 1][i].val_before_sigmoid;
     }
     /// 2) change output layer's incoming weights
     for (int i = 0; i < mv[mv.size() - 2].size(); i++) {
         for (int j = 0; j < mv[mv.size() - 1].size(); j++) {
-            mv[mv.size() - 2][i].weights[j] = mv[mv.size() - 2][i].weights[j] + learning_rate * mv[mv.size() - 1][j].error * mv[mv.size() - 2][i].val;
+            mv[mv.size() - 2][i].weights[j] =
+                    mv[mv.size() - 2][i].weights[j] + learning_rate * mv[mv.size() - 1][j].error * mv[mv.size() - 2][i].val;
         }
     }
     /// 3) calculate all hidden errors
@@ -215,22 +222,26 @@ void Green::back_propagate(const double &label) {
     }
 }
 
-bool Green::choose_answer(const double &label, bool debug_print) const {
+bool NeuralNet::choose_answer(const double &label, bool debug_print) const {
     std::vector<double> max_vector;
     for (int i = 0; i < mv[mv.size() - 1].size(); i++) {
         max_vector.push_back(mv[mv.size() - 1][i].val);
     }
     std::vector<double>::iterator answer_iter = std::max_element(max_vector.begin(), max_vector.end());
     double pos = (int) (answer_iter - max_vector.begin());
+    bool belief = (mv[mv.size() - 1][pos].real_identity == label);
     if (debug_print) {
-        std::cout << "Based on my output value of " << *answer_iter
-                  << " I believe this is a(n) " << mv[mv.size() - 1][pos].real_identity << '\n';
-        std::cout << "In reality this is a(n) " << label << '\n';
+        std::cout << std::fixed;
+        std::cout << "My output value ___ " << *answer_iter << " ___"
+                  << " I believe this is a(n) ___ " << mv[mv.size() - 1][pos].real_identity << " ___ "
+                  << "In reality this is a(n) ___ " << label << " ___";
+        if (!belief) std::cout << "    X";
+        std::cout << '\n';
     }
-    return (mv[mv.size() - 1][pos].real_identity == label);
+    return belief;
 }
 
-void Green::clear_network_BIAS() {
+void NeuralNet::clear_network_BIAS() {
     for (int i = 1; i < mv.size(); i++) {
         if (i == mv.size() - 1) {
             for (int j = 0; j < mv[i].size(); j++) {
@@ -247,7 +258,7 @@ void Green::clear_network_BIAS() {
     }
 }
 
-void Green::clear_network_NB() {
+void NeuralNet::clear_network_NB() {
     for (int i = 1; i < mv.size(); i++) {
         for (int j = 0; j < mv[i].size(); j++) {
             mv[i][j].val = 0;
@@ -256,7 +267,7 @@ void Green::clear_network_NB() {
     }
 }
 
-void Green::print_neural_layer(int index) const {
+void NeuralNet::print_neural_layer(int index) const {
     std::vector<Node> layer = mv[index];
     if (index == mv.size() - 1)
         std::cout << "========== OUTPUT LAYER (INDEX " << index << ") ==========" << std::endl;
@@ -268,7 +279,6 @@ void Green::print_neural_layer(int index) const {
         std::cout << "val " << node.val << '\n';
         std::cout << "val_before_sigmoid " << node.val_before_sigmoid << '\n';
         std::cout << "conn " << node.conn << '\n';
-//        std::cout << "id# " << node.unique_id << '\n';
         std::cout << "identity " << node.real_identity << '\n';
         std::cout << "weights "; for (double num : node.weights) std::cout << num << ' '; std::cout << '\n';
         std::cout << '\n';
@@ -276,7 +286,7 @@ void Green::print_neural_layer(int index) const {
     std::cout << "TOTAL " << layer.size() << " NODES IN LAYER " << index << '\n';
 }
 
-void Green::print_output_layer() const {
+void NeuralNet::print_output_layer() const {
     int index = (int) mv.size() - 1;
     std::cout << "========== OUTPUT LAYER (INDEX " << index << ") ==========" << std::endl;
     std::vector<Node> ovec = mv[mv.size() - 1];
@@ -284,14 +294,13 @@ void Green::print_output_layer() const {
         std::cout << "val " << node.val << '\n';
         std::cout << "val_before_sigmoid " << node.val_before_sigmoid << '\n';
         std::cout << "conn " << node.conn << '\n';
-//        std::cout << "id# " << node.unique_id << '\n';
         std::cout << "identity " << node.real_identity << '\n';
         std::cout << "weights "; for (double num : node.weights) std::cout << num << ' '; std::cout << '\n';
         std::cout << '\n';
     }
 }
 
-void Green::print_ENTIRE_network() const {
+void NeuralNet::print_ENTIRE_network() const {
     for (int i = 0; i < mv.size(); i++) {
         if (i == mv.size() - 1)
             std::cout << "========== OUTPUT LAYER (INDEX " << i << ") ==========" << std::endl;
@@ -311,14 +320,13 @@ void Green::print_ENTIRE_network() const {
     }
 }
 
-void Green::print_input_layer() const {
+void NeuralNet::print_input_layer() const {
     std::cout << "========== INPUT LAYER (INDEX 0) ==========" << std::endl;
     std::vector<Node> ovec = mv[0];
     for (Node node : ovec) {
         std::cout << "val " << node.val << '\n';
         std::cout << "val_before_sigmoid " << node.val_before_sigmoid << '\n';
         std::cout << "conn " << node.conn << '\n';
-//        std::cout << "id# " << node.unique_id << '\n';
         std::cout << "identity " << node.real_identity << '\n';
         std::cout << "weights "; for (double num : node.weights) std::cout << num << " "; std::cout << '\n';
         std::cout << '\n';

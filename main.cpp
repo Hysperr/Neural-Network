@@ -5,7 +5,8 @@
 #include <sstream>
 #include <cassert>
 #include <iomanip>
-#include "Green.h"
+#include <algorithm>
+#include "NeuralNet.h"
 
 int main() {
     srand(time(NULL));
@@ -13,12 +14,11 @@ int main() {
     constexpr int num_output_nodes = 10;
     constexpr double learning_rate = .125;
 
-    // hidden layer map. key = layer number from 0, value = nodes per layer. Alternative can use hidden_map[k] = v notation
-    std::map<int, int> hidden_map;
-    hidden_map.insert(std::pair<int, int>(0, 70));
+    std::map<unsigned, unsigned> hidden_map;            // hidden layer map. key = layer num, value = nodes per layer
+    hidden_map.insert(std::pair<int, int>(0, 150));     //  Alternative can use hidden_map[k] = v notation
 
     // create neural network
-    Green red(num_input_nodes, num_output_nodes, learning_rate, hidden_map, false);
+    NeuralNet red(num_input_nodes, num_output_nodes, learning_rate, hidden_map, false);
 
     // informative print
     std::cout << "Input node count = " << num_input_nodes
@@ -28,7 +28,7 @@ int main() {
               << " \n\n";
 
     // output identity
-    std::map<int, double> output_map;
+    std::map<unsigned, double> output_map;
     for (int i = 0; i < num_output_nodes; i++)
         output_map.insert(std::pair<int, double>(i, i));
     red.set_output_identity(output_map);
@@ -52,11 +52,11 @@ int main() {
         data_vector.clear();
     }
 
-    red.clear_network();
-    data_vector.clear();
+
     training_file.close();
     std::cout << "WEIGHTS TRAINED\n";
     int total_lines = 1797; int correct = 0; std::string line_test; double label_2, u;
+
 
     // testing
     std::ifstream test_file("../optdigits_test.txt");
@@ -71,23 +71,21 @@ int main() {
         data_vector.pop_back();
         red.insert_data(data_vector);
         red.forward_propagate();
-        if (red.choose_answer(label_2))
+        if (red.choose_answer(label_2, false))     /**< Uses default param = false. true to print network's beliefs */
             correct++;
 
         red.clear_network();
         data_vector.clear();
     }
 
+    double accuracy = ((double) correct / total_lines) * 100;
+
     std::cout << "Correct: " << correct << " out of " << total_lines  << '\n';
-    // Accuracy 3 different ways
-    // printf
-    std::printf("Accuracy: %.2f%%\n", ((double) correct / total_lines) * 100);
-    // iomanip
-    std::cout << "Accuracy: " << std::setprecision(2) << std::fixed << ((double) correct / total_lines) * 100 << "%\n";
-    // standard print
-    std::cout << "Accuracy: " << ((double) correct / total_lines) * 100  << '%' << '\n';
+
+    std::cout << "Accuracy: " << std::setprecision(2) << std::fixed << accuracy << "%\n";
 
     std::cout << "Total neural network connections: " << red.get_total_connections() << '\n';
+
 
     return 0;
 }

@@ -1,11 +1,17 @@
 
 #include "Node.h"
-#include "Green.h"
+#include "NeuralNet.h"
 #include <iostream>
 
-Node::Node(int front_conn, int back_conn) : val(0), val_before_sigmoid(0), error(0), real_identity(-1), conn(0), weights(), v_front(
-        (unsigned long long int) front_conn, nullptr), v_back((unsigned long long int) back_conn, nullptr) {
-
+Node::Node(unsigned int front_conn, unsigned int back_conn) : val(0),
+                                                              val_before_sigmoid(0),
+                                                              real_identity(-1),
+                                                              error(0),
+                                                              conn(0),
+                                                              weights(),
+                                                              old_weights(),
+                                                              v_front(front_conn, nullptr),
+                                                              v_back(back_conn, nullptr) {
 }
 
 Node::size_type Node::attach_v_front(Node &node) {
@@ -22,10 +28,8 @@ Node::size_type Node::attach_v_front(Node &node) {
     }
     if (!flag) {
         std::cout << "ATTACHMENT FAILED - FRONT\n";
-        // give the node id that it failed on
     }
     return num_attaches;
-    // consider returning the node, making this a friend function of neural class that updates total attaches variable
 }
 
 Node::size_type Node::attach_v_back(Node &node) {
@@ -42,8 +46,6 @@ Node::size_type Node::attach_v_back(Node &node) {
     }
     if (!flag) {
         std::cout << "ATTACHMENT FAILED - BACK\n";
-        // give the node id that it failed on
     }
     return num_attaches;
-    // consider returning the node, making this a friend function of neural class that updates total attaches variable
 }
