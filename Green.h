@@ -8,18 +8,18 @@
 #include <cmath>
 
 class Green {
-    /// public members
 public:
     /// ctors
     Green(int num_input_nodes, int num_output_nodes, double learning_rate, std::map<int, int> &mp, bool include_bias = false);
     /// getters
-    std::vector<std::vector<Node>>& getNeural_obj() { return mv; }
+    const std::vector<std::vector<Node>>& getNeural_obj() const { return mv; }
+    Node::size_type get_total_connections() const { return total_conn; }
     int getNum_output_nodes() const { return num_output_nodes; }
     int getNum_input_nodes() const { return num_input_nodes; }
     double getLearning_rate() const { return learning_rate; }
     bool biasIsActive() const { return bias; }
-    /// actions
-    void set_output_identity(const std::map<int, int>& identity_map, bool debug_print = false);
+    /// operations
+    void set_output_identity(const std::map<int, double> &identity_map, bool debug_print = false);
     void forward_propagate() { (bias) ? forward_propagate_BIAS() : forward_propagate_NB(); }
     void clear_network() { (bias) ? clear_network_BIAS() : clear_network_NB(); }
     bool choose_answer(const double &label, bool debug_print = false) const;
@@ -37,13 +37,13 @@ private:
     int num_input_nodes;
     int num_output_nodes;
     double learning_rate;
-//    Node::size_type total_attachments_made;
+    Node::size_type total_conn;
     std::vector<std::vector<Node>> mv;
     /// private member functions (we use these to build the neural object)
     std::vector<std::vector<Node>> prepare_hidden_layers(std::map<int, int>& mp);
-    void prepare_input_layer(std::vector<std::vector<Node>> &mv);
-    void prepare_output_layer(std::vector<std::vector<Node>> &mv);
-    void generate_neural_web(std::vector<std::vector<Node>> &mv);
+    void prepare_input_layer();
+    void prepare_output_layer();
+    void generate_neural_web();
     void generate_bias_nodes();
     /// their public counterparts decide which to call NB = no bias nodes, BIAS = bias nodes
     void forward_propagate_BIAS();

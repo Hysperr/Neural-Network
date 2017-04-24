@@ -13,18 +13,24 @@ int main() {
     constexpr int num_output_nodes = 10;
     constexpr double learning_rate = .125;
 
-    // hidden layer map. key layer number, value num nodes per layer. alternative can use hidden_map[k] = v notation
+    // hidden layer map. key = layer number from 0, value = nodes per layer. Alternative can use hidden_map[k] = v notation
     std::map<int, int> hidden_map;
     hidden_map.insert(std::pair<int, int>(0, 70));
 
     // create neural network
     Green red(num_input_nodes, num_output_nodes, learning_rate, hidden_map, false);
-    std::cout << "Bias active? " << ((red.biasIsActive()) ? "true" : "false") << '\n';
+
+    // informative print
+    std::cout << "Input node count = " << num_input_nodes
+              << " | Output node count = " << num_output_nodes
+              << " | Learning rate = " << learning_rate
+              << " | Bias active? " << ((red.biasIsActive()) ? "true" : "false")
+              << " \n\n";
 
     // output identity
-    std::map<int, int> output_map;
+    std::map<int, double> output_map;
     for (int i = 0; i < num_output_nodes; i++)
-        output_map.insert(std::pair<int, int>(i, i));
+        output_map.insert(std::pair<int, double>(i, i));
     red.set_output_identity(output_map);
 
     // training
@@ -80,6 +86,8 @@ int main() {
     std::cout << "Accuracy: " << std::setprecision(2) << std::fixed << ((double) correct / total_lines) * 100 << "%\n";
     // standard print
     std::cout << "Accuracy: " << ((double) correct / total_lines) * 100  << '%' << '\n';
+
+    std::cout << "Total neural network connections: " << red.get_total_connections() << '\n';
 
     return 0;
 }
