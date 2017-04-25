@@ -24,9 +24,9 @@ public:
     void set_output_identity(const std::map<unsigned, double> &identity_map, bool debug_print = false);
     void forward_propagate() { (bias) ? forward_propagate_BIAS() : forward_propagate_NB(); }
     void clear_network() { (bias) ? clear_network_BIAS() : clear_network_NB(); }
-    bool choose_answer(const double &label, bool debug_print = false) const;
+    bool choose_answer(const double label, bool debug_print = false) const;
     void insert_data(const std::vector<double> &data_vector);
-    void back_propagate(const double &label);
+    void back_propagate(const double label);
     /// prints
     void print_neural_layer(int index) const;
     void print_ENTIRE_network() const;

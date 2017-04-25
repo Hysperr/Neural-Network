@@ -176,8 +176,8 @@ void NeuralNet::forward_propagate_NB() {
     }
 }
 
-void NeuralNet::back_propagate(const double &label) {
-/// DOES NOT TAKE BIAS NODE INTO CONSIDERATION ///
+void NeuralNet::back_propagate(const double label) {
+    /// prepare old weights vector
     for (int i = 0; i < mv.size(); i++) {
         for (int j = 0; j < mv[i].size(); j++) {
             mv[i][j].old_weights = mv[i][j].weights;
@@ -222,7 +222,7 @@ void NeuralNet::back_propagate(const double &label) {
     }
 }
 
-bool NeuralNet::choose_answer(const double &label, bool debug_print) const {
+bool NeuralNet::choose_answer(const double label, bool debug_print) const {
     std::vector<double> max_vector;
     for (int i = 0; i < mv[mv.size() - 1].size(); i++) {
         max_vector.push_back(mv[mv.size() - 1][i].val);
@@ -286,6 +286,19 @@ void NeuralNet::print_neural_layer(int index) const {
     std::cout << "TOTAL " << layer.size() << " NODES IN LAYER " << index << '\n';
 }
 
+void NeuralNet::print_input_layer() const {
+    std::cout << "========== INPUT LAYER (INDEX 0) ==========" << std::endl;
+    std::vector<Node> ovec = mv[0];
+    for (Node node : ovec) {
+        std::cout << "val " << node.val << '\n';
+        std::cout << "val_before_sigmoid " << node.val_before_sigmoid << '\n';
+        std::cout << "conn " << node.conn << '\n';
+        std::cout << "identity " << node.real_identity << '\n';
+        std::cout << "weights "; for (double num : node.weights) std::cout << num << " "; std::cout << '\n';
+        std::cout << '\n';
+    }
+}
+
 void NeuralNet::print_output_layer() const {
     int index = (int) mv.size() - 1;
     std::cout << "========== OUTPUT LAYER (INDEX " << index << ") ==========" << std::endl;
@@ -317,18 +330,5 @@ void NeuralNet::print_ENTIRE_network() const {
             std::cout << "weights: "; for (double w : node.weights) std::cout << w << ' ';
             std::cout << "\n\n";
         }
-    }
-}
-
-void NeuralNet::print_input_layer() const {
-    std::cout << "========== INPUT LAYER (INDEX 0) ==========" << std::endl;
-    std::vector<Node> ovec = mv[0];
-    for (Node node : ovec) {
-        std::cout << "val " << node.val << '\n';
-        std::cout << "val_before_sigmoid " << node.val_before_sigmoid << '\n';
-        std::cout << "conn " << node.conn << '\n';
-        std::cout << "identity " << node.real_identity << '\n';
-        std::cout << "weights "; for (double num : node.weights) std::cout << num << " "; std::cout << '\n';
-        std::cout << '\n';
     }
 }
