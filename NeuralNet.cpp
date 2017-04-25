@@ -177,7 +177,6 @@ void NeuralNet::forward_propagate_NB() {
 }
 
 void NeuralNet::back_propagate(const double &label) {
-/// DOES NOT TAKE BIAS NODE INTO CONSIDERATION ///
     for (int i = 0; i < mv.size(); i++) {
         for (int j = 0; j < mv[i].size(); j++) {
             mv[i][j].old_weights = mv[i][j].weights;
