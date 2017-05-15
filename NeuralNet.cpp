@@ -31,7 +31,8 @@ std::vector<std::vector<Node>> NeuralNet::prepare_hidden_layers(std::map<unsigne
             }
         }
         else if (it->first == 0) {
-            auto itt = it; ++itt;
+            auto itt = it;
+            ++itt;
             for (int i = 0; i < it->second; i++) {
                 Node *node = new Node(itt->second, num_input_nodes);
                 node->initialize_weights(itt->second);
@@ -39,7 +40,8 @@ std::vector<std::vector<Node>> NeuralNet::prepare_hidden_layers(std::map<unsigne
             }
         }
         else if (it->first == mp.size() - 1) {
-            auto itt = it; --itt;
+            auto itt = it;
+            --itt;
             for (int i = 0; i < it->second; i++) {
                 Node *node = new Node(num_output_nodes, itt->second);
                 node->initialize_weights(num_output_nodes);
@@ -47,7 +49,9 @@ std::vector<std::vector<Node>> NeuralNet::prepare_hidden_layers(std::map<unsigne
             }
         }
         else {
-            auto it_left = it, it_right = it; --it_left; ++it_right;
+            auto it_left = it, it_right = it;
+            --it_left;
+            ++it_right;
             for (int i = 0; i < it->second; i++) {
                 Node *node = new Node(it_right->second, it_left->second);
                 node->initialize_weights(it_right->second);
@@ -84,7 +88,7 @@ void NeuralNet::generate_neural_web() {
     for (int i = 0; i < mv.size() - 1; i++) {
         for (int j = 0; j < mv[i].size(); j++) {
             for (int k = 0; k < mv[i + 1].size(); k++) {
-                 total_conn += mv[i][j].attach_v_front(mv[i + 1][k]);
+                total_conn += mv[i][j].attach_v_front(mv[i + 1][k]);
             }
         }
     }
@@ -199,7 +203,8 @@ void NeuralNet::back_propagate(const double label) {
     for (int i = 0; i < mv[mv.size() - 2].size(); i++) {
         for (int j = 0; j < mv[mv.size() - 1].size(); j++) {
             mv[mv.size() - 2][i].weights[j] =
-                    mv[mv.size() - 2][i].weights[j] + learning_rate * mv[mv.size() - 1][j].error * mv[mv.size() - 2][i].val;
+                    mv[mv.size() - 2][i].weights[j] +
+                    learning_rate * mv[mv.size() - 1][j].error * mv[mv.size() - 2][i].val;
         }
     }
     /// 3) calculate all hidden errors
@@ -280,7 +285,9 @@ void NeuralNet::print_neural_layer(int index) const {
         std::cout << "val_before_sigmoid " << node.val_before_sigmoid << '\n';
         std::cout << "conn " << node.conn << '\n';
         std::cout << "identity " << node.real_identity << '\n';
-        std::cout << "weights "; for (double num : node.weights) std::cout << num << ' '; std::cout << '\n';
+        std::cout << "weights ";
+        for (double num : node.weights) std::cout << num << ' ';
+        std::cout << '\n';
         std::cout << '\n';
     }
     std::cout << "TOTAL " << layer.size() << " NODES IN LAYER " << index << '\n';
@@ -294,7 +301,9 @@ void NeuralNet::print_input_layer() const {
         std::cout << "val_before_sigmoid " << node.val_before_sigmoid << '\n';
         std::cout << "conn " << node.conn << '\n';
         std::cout << "identity " << node.real_identity << '\n';
-        std::cout << "weights "; for (double num : node.weights) std::cout << num << " "; std::cout << '\n';
+        std::cout << "weights ";
+        for (double num : node.weights) std::cout << num << " ";
+        std::cout << '\n';
         std::cout << '\n';
     }
 }
@@ -308,7 +317,9 @@ void NeuralNet::print_output_layer() const {
         std::cout << "val_before_sigmoid " << node.val_before_sigmoid << '\n';
         std::cout << "conn " << node.conn << '\n';
         std::cout << "identity " << node.real_identity << '\n';
-        std::cout << "weights "; for (double num : node.weights) std::cout << num << ' '; std::cout << '\n';
+        std::cout << "weights ";
+        for (double num : node.weights) std::cout << num << ' ';
+        std::cout << '\n';
         std::cout << '\n';
     }
 }
@@ -327,8 +338,10 @@ void NeuralNet::print_ENTIRE_network() const {
             std::cout << "val_before_sigmoid " << node.val_before_sigmoid << '\n';
             std::cout << "conn: " << node.conn << '\n';
             std::cout << "identity: " << node.real_identity << '\n';
-            std::cout << "weights: "; for (double w : node.weights) std::cout << w << ' ';
-            std::cout << "\n\n";
+            std::cout << "weights: ";
+            for (double w : node.weights) std::cout << w << ' ';
+            std::cout << '\n';
+            std::cout << '\n';
         }
     }
 }

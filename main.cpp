@@ -35,7 +35,9 @@ int main() {
 
     // training
     double label_1;
-    std::vector<double> data_vector; std::string line; double i;
+    std::vector<double> data_vector;
+    std::string line;
+    double i;
     std::ifstream training_file("../optdigits_train.txt");
     while (std::getline(training_file, line)) {
         std::istringstream iss(line);
@@ -55,7 +57,10 @@ int main() {
 
     training_file.close();
     std::cout << "WEIGHTS TRAINED\n";
-    int total_lines = 1797; int correct = 0; std::string line_test; double label_2, u;
+    int total_lines = 1797;
+    int correct = 0;
+    std::string line_test;
+    double u, label_2;
 
 
     // testing
@@ -80,7 +85,7 @@ int main() {
 
     double accuracy = ((double) correct / total_lines) * 100;
 
-    std::cout << "Correct: " << correct << " out of " << total_lines  << '\n';
+    std::cout << "Correct: " << correct << " out of " << total_lines << '\n';
 
     std::cout << "Accuracy: " << std::setprecision(2) << std::fixed << accuracy << "%\n";
 
