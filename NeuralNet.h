@@ -11,7 +11,7 @@ class NeuralNet {
 public:
     // ctors
     /*!
-     * Constructor initializing a neural net object.
+     * Constructor initializing a neural net object which is backed by a 2D vector neural net representation.
      * @param num_input_nodes - The number of input nodes to generate.
      * @param num_output_nodes - The number of output nodes to generate.
      * @param learning_rate - The learning rate/alpha.
@@ -100,15 +100,24 @@ public:
     void print_input_layer() const;
 
 private:
-    bool bias;
+    bool bias;                              /*!< Determines if bias nodes are active for this neural net */
     unsigned int num_input_nodes;
     unsigned int num_output_nodes;
     double learning_rate;
-    Node::size_type total_conn;
-    std::vector<std::vector<Node>> mv;
+    Node::size_type total_conn;             /*!< Total connections in neural net, added by attach_v_front() and/or attach_v_back() */
+    std::vector<std::vector<Node>> mv;      /*!< This field is the underlying net. Each vector within \c mv field represents a
+                                             * single layer. Once input and output layers are generated, \c mv[0] is input layer,
+                                             * \c [mv.size()-1] is output layer.
+                                             */
 
+    // private member functions below... (we use these to build the neural object)
 
-    // private member functions (we use these to build the neural object)
+    /*! The \c std::map used to generate hidden layers of neural net.
+     * key = layer number (must start from 0 and increment by 1!),
+     * value = num nodes per layer.
+     * @param mp - The map used to generate hidden layers
+     * @return - Returns a std::vector<std::vector<Node>> which is assigned to \c mv field in constructor
+     */
     std::vector<std::vector<Node>> prepare_hidden_layers(std::map<unsigned, unsigned> &mp);
 
     void prepare_input_layer();
@@ -119,7 +128,7 @@ private:
 
     void generate_bias_nodes();
 
-    // their public counterparts decide which to call NB = no bias nodes, BIAS = bias nodes
+    // their public counterparts decide which to call: NB = no bias nodes, BIAS = bias nodes
     void forward_propagate_BIAS();
 
     void forward_propagate_NB();
@@ -128,7 +137,11 @@ private:
 
     void clear_network_NB();
 
-    // private member function inlined in class
+    /*! Private member function inlined in class.
+     * Calculates derivative of \c val_before_sigmoid within back_propagate()
+     * @param x - \c value_before_sigmoid.
+     * @return - The derivative.
+     */
     double derivative_of_sigmoid(double x) {
         return (pow(M_E, x)) / pow((pow(M_E, x) + 1), 2);
     }

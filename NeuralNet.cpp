@@ -19,18 +19,30 @@ NeuralNet::NeuralNet(unsigned num_input_nodes, unsigned num_output_nodes, double
         generate_bias_nodes();
 }
 
+/** Maps use key/value pairs, k/v. The keys must be unique, and for this neural net, keys must start from 0 and increment by 1.
+ * We iterate through the map using a for loop. Since the key of each element represents a hidden layer index,
+ * we create a \c layer_vector for each element and process it based on a series of conditions. For example, the first condition,
+ * if (it->first == 0 && mp.size() == 1) says if this element is the only element in the map, then loop through it it->second
+ * number of times (which is the value v of the element) and each time, create a new \c node object and pass into its constructor
+ * the number of output nodes, and input nodes. The formal parameters for the node constructor says front_conn and back_conn for
+ * the number of front and back connections respectively. This explains why in other condition branches you see itt->second or
+ * it_right->second. These iterators are pointing to the number of nodes in the next layer, so it makes sense to use them in
+ * the node's parameter to specify the number of nodes in the next and previous layers.
+ * @param mp - The hidden layer map
+ * @return  - a std::vector<std::vector<Node>> hidden layer net
+ */
 std::vector<std::vector<Node>> NeuralNet::prepare_hidden_layers(std::map<unsigned, unsigned> &mp) {
     std::vector<std::vector<Node>> master_vector;
     for (auto it = mp.begin(); it != mp.end(); ++it) {
         std::vector<Node> layer;  // layer vector
-        if (it->first == 0 && mp.size() == 1) {
+        if (it->first == 0 && mp.size() == 1) {     // single hidden layer, flanked by input layer (back) and output layer (front)
             for (int i = 0; i < it->second; i++) {
                 Node *node = new Node(num_output_nodes, num_input_nodes);
-                node->initialize_weights(num_output_nodes);     // number of weights is size of next layer over
+                node->initialize_weights(num_output_nodes);             // number of weights is size of next layer over
                 layer.push_back(*node);
             }
         }
-        else if (it->first == 0) {
+        else if (it->first == 0) {                  // first hidden layer, previous layer is input layer
             auto itt = it;
             ++itt;
             for (int i = 0; i < it->second; i++) {
@@ -39,7 +51,7 @@ std::vector<std::vector<Node>> NeuralNet::prepare_hidden_layers(std::map<unsigne
                 layer.push_back(*node);
             }
         }
-        else if (it->first == mp.size() - 1) {
+        else if (it->first == mp.size() - 1) {      // last hidden layer, next layer is output layer
             auto itt = it;
             --itt;
             for (int i = 0; i < it->second; i++) {
@@ -48,7 +60,7 @@ std::vector<std::vector<Node>> NeuralNet::prepare_hidden_layers(std::map<unsigne
                 layer.push_back(*node);
             }
         }
-        else {
+        else {                                      // a hidden layer flanked by hidden layers
             auto it_left = it, it_right = it;
             --it_left;
             ++it_right;
