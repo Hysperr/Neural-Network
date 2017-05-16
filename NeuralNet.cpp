@@ -26,7 +26,7 @@ std::vector<std::vector<Node>> NeuralNet::prepare_hidden_layers(std::map<unsigne
         if (it->first == 0 && mp.size() == 1) {     // 1 hidden layer, flanked by input layer (back) and output layer
             for (int i = 0; i < it->second; i++) {
                 Node *node = new Node(num_output_nodes, num_input_nodes);
-                node->initialize_weights(num_output_nodes);             // number of weights is size of next layer over
+                node->initialize_weights(num_output_nodes);
                 layer.push_back(*node);
             }
         }
