@@ -100,7 +100,6 @@ void NeuralNet::generate_neural_web() {
                 // decided no inclusion of total_conn
             }
         }
-        mv[(mv.end() -1) - mv.begin()];
     }
 }
 
@@ -135,7 +134,7 @@ void NeuralNet::insert_data(const std::vector<double> &data_vector) {
 }
 
 void NeuralNet::forward_propagate_BIAS() {
-    /// begin forward pass
+    // begin forward pass
     for (int i = 0; i < mv.size() - 1; i++) {
         for (int j = 0; j < mv[i].size(); j++) {
             if (i == mv.size() - 2) { // last hidden layer.
@@ -149,7 +148,7 @@ void NeuralNet::forward_propagate_BIAS() {
                 }
             }
         }
-        /// forwarding to next layer is complete. Now begin crush on that next layer. Sigmoid.
+        // forwarding to next layer is complete. Now begin crush on that next layer. Sigmoid.
         if (i == mv.size() - 2) { // last hidden layer
             for (int p = 0; p < mv[i + 1].size(); p++) {
                 mv[i + 1][p].val_before_sigmoid = mv[i + 1][p].val;
@@ -166,14 +165,14 @@ void NeuralNet::forward_propagate_BIAS() {
 }
 
 void NeuralNet::forward_propagate_NB() {
-    /// now begin forward pass procedures
+    // now begin forward pass procedures
     for (int i = 0; i < mv.size() - 1; i++) {
         for (int j = 0; j < mv[i].size(); j++) {
             for (int k = 0; k < mv[i + 1].size(); k++) {
                 mv[i + 1][k].val += (mv[i][j].val * mv[i][j].weights[k]);
             }
         }
-        /// forwarding to next layer is complete. Now begin crush on that next layer. Sigmoid.
+        // forwarding to next layer is complete. Now begin crush on that next layer. Sigmoid.
         for (int p = 0; p < mv[i + 1].size(); p++) {
             mv[i + 1][p].val_before_sigmoid = mv[i + 1][p].val;
             mv[i + 1][p].val = 1 / (1 + pow(M_E, -(mv[i + 1][p].val)));
@@ -182,13 +181,13 @@ void NeuralNet::forward_propagate_NB() {
 }
 
 void NeuralNet::back_propagate(const double label) {
-    /// prepare old weights vector
+    // prepare old weights vector
     for (int i = 0; i < mv.size(); i++) {
         for (int j = 0; j < mv[i].size(); j++) {
             mv[i][j].old_weights = mv[i][j].weights;
         }
     }
-    /// 1) calculate errors of output neurons
+    // 1) calculate errors of output neurons
     for (int i = 0; i < mv[mv.size() - 1].size(); i++) {
         if (label == mv[mv.size() - 1][i].real_identity) {
             mv[mv.size() - 1][i].val_before_sigmoid =
@@ -200,7 +199,7 @@ void NeuralNet::back_propagate(const double label) {
         }
         mv[mv.size() - 1][i].error = mv[mv.size() - 1][i].val_before_sigmoid;
     }
-    /// 2) change output layer's incoming weights
+    // 2) change output layer's incoming weights
     for (int i = 0; i < mv[mv.size() - 2].size(); i++) {
         for (int j = 0; j < mv[mv.size() - 1].size(); j++) {
             mv[mv.size() - 2][i].weights[j] =
@@ -208,7 +207,7 @@ void NeuralNet::back_propagate(const double label) {
                     learning_rate * mv[mv.size() - 1][j].error * mv[mv.size() - 2][i].val;
         }
     }
-    /// 3) calculate all hidden errors
+    // 3) calculate all hidden errors
     for (int i = (int) mv.size() - 2; i >= 1; i--) {
         for (int j = 0; j < mv[i].size(); j++) {
             double err_gather = 0;
@@ -218,7 +217,7 @@ void NeuralNet::back_propagate(const double label) {
             mv[i][j].error = derivative_of_sigmoid(mv[i][j].val_before_sigmoid) * err_gather;
         }
     }
-    /// 4) change hidden layer weights
+    // 4) change hidden layer weights
     for (int i = (int) (mv.size() - 3); i >= 0; i--) {
         for (int j = 0; j < mv[i].size(); j++) {
             for (int k = 0; k < mv[i][j].v_front.size(); k++) {
