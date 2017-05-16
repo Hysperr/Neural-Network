@@ -15,9 +15,9 @@ public:
     typedef size_t size_type;
 
     /*!
-     * Constructor used to initialize v_front with the
-     * number of nodes in the next-layer and v_back
-     * with the number of nodes in the previous-layer
+     * Constructor initializes \c v_front with the
+     * number of nodes in the next layer and \c v_back
+     * with the number of nodes in the previous layer
      * @param front_conn - number of front connections.
      * @param back_conn - number of back connections.
      */
@@ -58,7 +58,7 @@ private:
 
     double real_identity;               /*!< Used to identify what each output-layer node represents */
 
-    int conn;                           /*!< Num connections for current node. */
+    int conn;                           /*!< Number of connections for current node. */
 
     std::vector<Node *> v_front;        /*!< Holds connections to every next-layer node, corresponds to \c weights field */
 
@@ -74,11 +74,11 @@ private:
      * the calling node's attachments in \c v_front
      * by generating pseudorandom floating-points
      * from [0.001 - 0.0099] and pushing into node's
-     * \c weight vector field. Each index within
-     * \c weight corresponds to the node's attachments
-     * in v_front. Thus they are unique. Each attachment
-     * has a unique weight. The seed for rand() must be
-     * established in driver file.
+     * \c weights vector field. Each index within
+     * \c weights corresponds to the node's attachments
+     * in \c v_front. Thus each attachment has a unique
+     * weight. The seed for rand() must be established
+     * in driver file.
      * @param front_connections - num nodes in next layer
      * to the calling node's weight vector.
      */
