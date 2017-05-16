@@ -22,7 +22,7 @@ NeuralNet::NeuralNet(unsigned num_input_nodes, unsigned num_output_nodes, double
 std::vector<std::vector<Node>> NeuralNet::prepare_hidden_layers(std::map<unsigned, unsigned> &mp) {
     std::vector<std::vector<Node>> master_vector;
     for (auto it = mp.begin(); it != mp.end(); ++it) {
-        std::vector<Node> layer;  // layer vector
+        std::vector<Node> layer;
         if (it->first == 0 && mp.size() == 1) {     // 1 hidden layer, flanked by input layer (back) and output layer
             for (int i = 0; i < it->second; i++) {
                 Node *node = new Node(num_output_nodes, num_input_nodes);
