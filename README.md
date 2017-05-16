@@ -1,5 +1,35 @@
 # Neural_Network 
 ###### C++11 Required ######
+
+<pre>
+<b>function</b> BACK-PROP-LEARNING(<i>examples</i>, <i>network</i>) <b>returns</b> a neural network
+	<b>inputs:</b> <i>examples</i>, a set of examples, each with input vector <b>x</b> and output vector <b>y</b>
+		<i>network</i>, a multilayer network with <i>L</i> layers, weights <i>w<sub>i,j</sub></i> activation function <i>g</i>
+	<b>local variables</b>: Δ, a vector of errors, indexed by network node
+	<b>repeat</b>
+		<b>for each</b> weight <i>w<sub>i,j</sub></i> in <i>network</i> <b>do</b>
+			<i>w<sub>i,j</sub></i> ← a small random number
+		<b>for each</b> example (<b>x</b>, <b>y</b>) <b>in</b> <i>examples</i> <b>do</b>
+			<i>/* Propagate the inputs forward to compute the outputs */</i>
+			<b>For each</b> node <i>i</i> in the input layer <b>do</b>
+				<i>a<sub>i</sub> ← x<sub>i</sub></i>
+			<b>for</b> <i>l</i> = 2 <b>to</b> <i>L</i> <b>do</b>
+				<b>for each</b> node <i>j</i> in layer <i>l</i> <b>do</b>
+					<i>in<sub>j</sub> ← Σ<sub>i</sub> w<sub>i,j</sub> a<sub>i</sub></i>
+					<i>a<sub>j</sub> ← g(in<sub>j</sub>)</i>
+			<i>/* Propagate deltas backward from output layer to input layer */</i>
+			<b>For each</b> node <i>j</i> in the output layer <b>do</b>
+				Δ[i] ← g' (in<sub>i</sub>) Σ<sub>j</sub> w<sub>i,j</sub> Δ[j]
+			<b>for</b> l = L - 1 <b>to</b> 1 <b>do</b>
+				<b>for each</b> node <i>i</i> in layer <i>l</i> <b>do</b>
+					<i>Δ[i] ← g' (in<sub>i</sub>) Σ<sub>j</sub> w<sub>i,j</sub> Δ[j]</i>
+			<i>/* Update every weight in network using deltas */</i>
+			<b>for each</b> weight <i><sub>wi,j</sub></i> in <i>network</i> <b>do</b>
+				<i>w<sub>i,j</sub> ← w<sub>i,j</sub> + α x αi x Δ[j]</i>
+<b>until</b> some stopping criterion is satisfied
+	<b>return</b> <i>network</i>
+</pre>
+
 These files are part of a personal attempt to create a convolutional neural network (CNN).
 The two classes that make the base neural net are tightly coupled such that they act as a single unit, only separated.
 In short, the Node class provides the building blocks to build the NeuralNet class which allows users to create multiple feed-forward multilayered artificial neural networks with backpropagation. From there a linker class will join these such that we have another neural net object where each node is itself a neural net.
