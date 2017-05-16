@@ -15,19 +15,19 @@
 			<i>/* Propagate the inputs forward to compute the outputs */</i>
 			<b>For each</b> node <i>i</i> in the input layer <b>do</b>
 				<i>a<sub>i</sub> ← x<sub>i</sub></i>
-			<b>for</b> <i>l</i> = 2 <b>to</b> <i>L</i> <b>do</b>
+			<b>for</b> <i>&#x2113;</i> = 2 <b>to</b> <i>L</i> <b>do</b>
 				<b>for each</b> node <i>j</i> in layer <i>l</i> <b>do</b>
 					<i>in<sub>j</sub> ← Σ<sub>i</sub> w<sub>i,j</sub> a<sub>i</sub></i>
 					<i>a<sub>j</sub> ← g(in<sub>j</sub>)</i>
 			<i>/* Propagate deltas backward from output layer to input layer */</i>
 			<b>For each</b> node <i>j</i> in the output layer <b>do</b>
 				Δ[i] ← g' (in<sub>i</sub>) Σ<sub>j</sub> w<sub>i,j</sub> Δ[j]
-			<b>for</b> l = L - 1 <b>to</b> 1 <b>do</b>
-				<b>for each</b> node <i>i</i> in layer <i>l</i> <b>do</b>
+			<b>for</b> &#x2113; = L - 1 <b>to</b> 1 <b>do</b>
+				<b>for each</b> node <i>i</i> in layer <i>&#x2113;</i> <b>do</b>
 					<i>Δ[i] ← g' (in<sub>i</sub>) Σ<sub>j</sub> w<sub>i,j</sub> Δ[j]</i>
 			<i>/* Update every weight in network using deltas */</i>
-			<b>for each</b> weight <i><sub>wi,j</sub></i> in <i>network</i> <b>do</b>
-				<i>w<sub>i,j</sub> ← w<sub>i,j</sub> + α x αi x Δ[j]</i>
+			<b>for each</b> weight <i>w<sub>i,j</sub></i> in <i>network</i> <b>do</b>
+				<i>w<sub>i,j</sub> ← w<sub>i,j</sub> + α x α<sub>i</sub> x Δ[j]</i>
 	<b>until</b> some stopping criterion is satisfied
 	<b>return</b> <i>network</i>
 </pre>
