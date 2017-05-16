@@ -23,7 +23,7 @@ public:
               bool include_bias = false);
 
     // getters
-    /*! Returns constant reference to the read-only backed 2D vector (net) */
+    /*! Returns constant reference to the read-only 2D vector */
     const std::vector<std::vector<Node>> &getNeural_obj() const { return mv; }
 
     typename Node::size_type get_total_connections() const { return total_conn; }
@@ -38,16 +38,16 @@ public:
 
     // operations
     /*!
-     * Sets \c real_identity field within output-layer nodes
+     * Sets \c real_identity field within output layer nodes
      * using \c std::map. key/value pairs key = index (must
-     * start from 0, increment by 1), value = \c real identity.
+     * start from 0, increment by 1), value = real identity.
      * An assertion ensures the map's size is the same size as
      * the number of output nodes. The index of each element
      * within the map corresponds to the index of each output
-     * layer node. Default parameter \c debug_print = false.
+     * layer node. Def param <code> debug_print = false </code>
      * True outputs each output-layer's real_identity.
-     * @param identity_map
-     * @param debug_print
+     * @param identity_map - The map to set output node identities
+     * @param debug_print - Default param \c false
      */
     void set_output_identity(const std::map<unsigned, double> &identity_map, bool debug_print = false);
 
@@ -55,8 +55,8 @@ public:
      * Public function call for user which calls 1 of 2
      * private forward propagate functions to account for
      * whether bias nodes are active.
-     * f..._BIAS is called when \c bias = true
-     * f..._NB is called when \c bias = false
+     * forw_p..._BIAS is called when <code> bias = true </code>
+     * forw_p..._NB is called when <code> bias = false </code>
      */
     void forward_propagate() { (bias) ? forward_propagate_BIAS() : forward_propagate_NB(); }
 
@@ -64,8 +64,8 @@ public:
      * Public function call for user which calls 1 of 2
      * private clear network functions to account for
      * whether bias nodes are active.
-     * clear_n..._BIAS is called when \c bias = true
-     * clear_n..._NB is called when \c bias = false
+     * clear_n..._BIAS is called when <code> bias = true </code>
+     * clear_n..._NB is called when <code> bias = false </code>
      */
     void clear_network() { (bias) ? clear_network_BIAS() : clear_network_NB(); }
 
@@ -77,10 +77,10 @@ public:
      * set earlier by \c set_output_identity(), corresponds to
      * the \c label parameter, then the neural net's decision
      * is correct and \c true is returned. Default parameter
-     * debug_print = false. True outputs ALL of neural net's data
-     * used to make its decision along with a visual illustration
-     * of where it guessed correctly and incorrectly.
-     *
+     * <code> debug_print = false </code>. True outputs ALL of
+     * neural net's belief data used to make its decision along 
+     * with a visual illustration of where it guessed correctly
+     * and incorrectly.
      * @param label - The real identity of the input data.
      * @param debug_print - Default parameter. True prints belief data.
      * @return
@@ -88,7 +88,7 @@ public:
     bool choose_answer(const double label, bool debug_print = false) const;
 
     /*!
-     * Inserts raw data into neural net's input-layer \c mv[0].
+     * Inserts raw data into neural net's input layer \c mv[0].
      * An assertion checks the size of \c data_vector is equal to
      * the number of input nodes.
      * @param data_vector
@@ -145,7 +145,7 @@ private:
     /*!
      * Generates input layer of neural net by inserting
      * \c std::vector<Node> at beginning of \c mv
-     * postcondition: mv[0] is hidden layer and
+     * postcondition: mv[0] is input layer and
      * mv[1] though mv[mv.size() - 1] are hidden layers.
      */
     void prepare_input_layer();
