@@ -1,6 +1,8 @@
 # Neural_Network 
 ###### C++11 Required ######
 
+#### Back-propagation algorithm for learning in multilayer networks
+
 <pre>
 <b>function</b> BACK-PROP-LEARNING(<i>examples</i>, <i>network</i>) <b>returns</b> a neural network
 	<b>inputs:</b> <i>examples</i>, a set of examples, each with input vector <b>x</b> and output vector <b>y</b>
@@ -26,7 +28,7 @@
 			<i>/* Update every weight in network using deltas */</i>
 			<b>for each</b> weight <i><sub>wi,j</sub></i> in <i>network</i> <b>do</b>
 				<i>w<sub>i,j</sub> ← w<sub>i,j</sub> + α x αi x Δ[j]</i>
-<b>until</b> some stopping criterion is satisfied
+	<b>until</b> some stopping criterion is satisfied
 	<b>return</b> <i>network</i>
 </pre>
 
