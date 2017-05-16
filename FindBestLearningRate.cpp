@@ -19,8 +19,8 @@ int main() {
     int numRuns = 0;
     //------------------------------------------------------------------------------------------------------------------
     while (ntc > 0) {
-        constexpr int num_input_nodes = 64;
-        constexpr int num_output_nodes = 10;
+        const int num_input_nodes = 64;
+        const int num_output_nodes = 10;
         double learning_rate = tlr;
 
         std::map<unsigned, unsigned> hidden_map;           // hidden layer map. key = layer num, value = nodes per layer
