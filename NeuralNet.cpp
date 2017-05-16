@@ -19,23 +19,11 @@ NeuralNet::NeuralNet(unsigned num_input_nodes, unsigned num_output_nodes, double
         generate_bias_nodes();
 }
 
-/*! Maps use key/value pairs, k/v. The keys must be unique, and for this neural net,
- * keys must start from 0 and increment by 1. We iterate through the map using a for loop.
- * Since the key of each element represents a hidden layer index,
- * we create a \c layer_vector for each element and process it based on a series of conditions.
- * We loop it->second number of times (which is the value v num elems per layer) and each time,
- * create a new \c node object. The formal parameters for the node constructor accepts an integer
- * for the number of next and previous layer connections. Iterator manipulation to access the
- * next or previous element's number of nodes fulfils this requirement.
- * After a layer is prepared, it is pushed into the master_vector.
- * @param mp - The hidden layer map
- * @return  - a std::vector<std::vector<Node>> hidden layer net
- */
 std::vector<std::vector<Node>> NeuralNet::prepare_hidden_layers(std::map<unsigned, unsigned> &mp) {
     std::vector<std::vector<Node>> master_vector;
     for (auto it = mp.begin(); it != mp.end(); ++it) {
         std::vector<Node> layer;  // layer vector
-        if (it->first == 0 && mp.size() == 1) {     // 1 hidden layer, flanked by input layer (back) an output layer (front)
+        if (it->first == 0 && mp.size() == 1) {     // 1 hidden layer, flanked by input layer (back) and output layer
             for (int i = 0; i < it->second; i++) {
                 Node *node = new Node(num_output_nodes, num_input_nodes);
                 node->initialize_weights(num_output_nodes);             // number of weights is size of next layer over
@@ -112,6 +100,7 @@ void NeuralNet::generate_neural_web() {
                 // decided no inclusion of total_conn
             }
         }
+        mv[(mv.end() -1) - mv.begin()];
     }
 }
 
@@ -161,7 +150,7 @@ void NeuralNet::forward_propagate_BIAS() {
             }
         }
         /// forwarding to next layer is complete. Now begin crush on that next layer. Sigmoid.
-        if (i == mv.size() - 2) { // last hidden layer.
+        if (i == mv.size() - 2) { // last hidden layer
             for (int p = 0; p < mv[i + 1].size(); p++) {
                 mv[i + 1][p].val_before_sigmoid = mv[i + 1][p].val;
                 mv[i + 1][p].val = 1 / (1 + pow(M_E, -(mv[i + 1][p].val)));

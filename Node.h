@@ -10,62 +10,76 @@
 
 class Node {
 public:
-    friend class NeuralNet;             /*!< Tightly coupled classes acting as single unit */
+    /*! Tightly coupled classes acting as single unit */
+    friend class NeuralNet;
     typedef size_t size_type;
 
-    /*! Constructor
-     * Used to initialize v_front with
-     * the number of nodes in the next-layer and
-     * v_back with the number of nodes in the previous-layer
-     * @param front_conn
-     * @param back_conn
+    /*!
+     * Constructor used to initialize v_front with the
+     * number of nodes in the next-layer and v_back
+     * with the number of nodes in the previous-layer
+     * @param front_conn - number of front connections.
+     * @param back_conn - number of back connections.
      */
     Node(unsigned int front_conn, unsigned int back_conn);
 
-    /*! Attaches \c this node to \c node.
-     * This function should only be called
-     * when attaching to the next layer of nodes.
-     * The calling node attaches to the param \c node by
-     * assigning one of its pointers located within v_front to
-     * the parameter \c node. One connection
-     * will be made per function call. If a failed attachment occurs,
-     * a message alerting the user is printed to output.
+    /*!
+     * This function should only be called when attaching
+     * to the next layer of nodes. The calling node
+     * attaches to the param \c node by assigning one of
+     * its pointers located within \c v_front to the param
+     * \c node. One connection is made per function call.
+     * If a failed attachment occurs, a message alerting
+     * the user is printed to output.
      * @param node - The node to attach to.
      * @return - The number of connections made.
      */
     typename Node::size_type attach_v_front(Node &node);
 
-    /*! Attaches \c this node to \c node.
-     * This function should only be called
-     * when attaching to the previous layer of nodes.
-     * The calling node attaches to the param \c node by
-     * assigning one of its pointers located within v_back to
-     * the parameter \c node. One connection
-     * will be made per function call. If a failed attachment occurs,
-     * a message alerting the user is printed to output.
+    /*!
+     * This function should only be called when attaching
+     * to the previous layer of nodes. The calling node
+     * attaches to the param \c node by assigning one of
+     * its pointers located within \c v_back to the param
+     * \c node. One connection is made per function call.
+     * If a failed attachment occurs, a message alerting
+     * the user is printed to output.
      * @param node - The node to attach to.
      * @return - The number of connections made.
      */
     typename Node::size_type attach_v_back(Node &node);
 
 private:
-    double val;
-    double val_before_sigmoid;
-    double error;
+    double val;                         /*!< Node's data value */
+
+    double val_before_sigmoid;          /*!< Node's data value before processed using sigmoid function 1 / 1 + (e^-z) */
+
+    double error;                       /*!< Error value used in data processing */
+
     double real_identity;               /*!< Used to identify what each output-layer node represents */
-    int conn;
+
+    int conn;                           /*!< Num connections for current node. */
+
     std::vector<Node *> v_front;        /*!< Holds connections to every next-layer node, corresponds to \c weights field */
+
     std::vector<Node *> v_back;         /*!< Holds connections to every previous-layer node */
+
     std::vector<double> weights;        /*!< Unique floating-points for each next-layer node, corresponds to \c v_front field */
+
     std::vector<double> old_weights;    /*!< Only used within NeuralNet::back_propagate()
 
 
-    /*! Assigns arbitrarily small weights to calling node's connections.
-     * Very small floating points are assigned to the calling node's weight vector.
-     * It's weight vector correspond to its physical node attachments in v_front.
-     * Therefore each connection has a unique, small weight. The seed must be
+    /*!
+     * Assigns arbitrarily tiny weight to each of
+     * the calling node's attachments in \c v_front
+     * by generating pseudorandom floating-points
+     * from [0.001 - 0.0099] and pushing into node's
+     * \c weight vector field. Each index within
+     * \c weight corresponds to the node's attachments
+     * in v_front. Thus they are unique. Each attachment
+     * has a unique weight. The seed for rand() must be
      * established in driver file.
-     * @param front_connections - Determines the number of values to assign
+     * @param front_connections - num nodes in next layer
      * to the calling node's weight vector.
      */
     void initialize_weights(int front_connections) {
